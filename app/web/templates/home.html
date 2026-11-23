@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Repl.ai</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f4ef;
+        --ink: #1c1917;
+        --muted: #57534e;
+        --card: #fffcf7;
+        --line: #e7e0d4;
+        --accent: #1d4ed8;
+        --ok: #166534;
+        --warn: #9a3412;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "Iowan Old Style", Palatino, Georgia, serif;
+        background: var(--bg);
+        color: var(--ink);
+      }
+      main {
+        max-width: 40rem;
+        margin: 0 auto;
+        padding: 2.5rem 1.25rem 4rem;
+      }
+      h1 { font-size: 1.6rem; font-weight: 600; margin: 0 0 0.35rem; }
+      p.lede { color: var(--muted); margin: 0 0 1.5rem; line-height: 1.45; }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 1rem 1.1rem;
+        margin-bottom: 1rem;
+      }
+      .banner {
+        background: #ecfdf3;
+        color: var(--ok);
+        border-color: #bbf7d0;
+      }
+      .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.7rem 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .row:last-child { border-bottom: 0; padding-bottom: 0; }
+      .row:first-child { padding-top: 0; }
+      .email { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.92rem; }
+      .meta { color: var(--muted); font-size: 0.85rem; }
+      .status { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; }
+      .status.needs_reconnect { color: var(--warn); }
+      .status.active { color: var(--ok); }
+      a.button, button {
+        display: inline-block;
+        background: var(--accent);
+        color: white;
+        text-decoration: none;
+        border: 0;
+        border-radius: 8px;
+        padding: 0.7rem 1rem;
+        font: inherit;
+        cursor: pointer;
+      }
+      button.secondary { background: #44403c; }
+      .actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.4rem; }
+      .empty { color: var(--muted); padding: 0.4rem 0; }
+      footer { color: var(--muted); font-size: 0.85rem; margin-top: 1.25rem; line-height: 1.4; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Repl.ai</h1>
+      <p class="lede">
+        Connect every Gmail you want tracked (company, org, personal).
+        Each Connect signs into a <strong>different Google account</strong>.
+        The classified report is always emailed to the main inbox below.
+      </p>
+
+      {% if connected %}
+      <div class="card banner">Connected {{ connected }}</div>
+      {% endif %}
+      {% if notice %}
+      <div class="card banner">{{ notice }}</div>
+      {% endif %}
+      {% if error %}
+      <div class="card" style="color: var(--warn)">{{ error }}</div>
+      {% endif %}
+
+      <div class="card">
+        <div class="meta">Daily report goes to</div>
+        <div class="email" style="margin-top: 0.25rem">
+          {{ founder_alert_email or "Set FOUNDER_ALERT_EMAIL in .env" }}
+        </div>
+        <div class="meta" style="margin-top: 0.35rem">
+          Classifier: {{ llm_model or "not set" }} · {{ digest_hour }}:00 {{ timezone }}
+        </div>
+      </div>
+
+      <div class="card">
+        {% if accounts %}
+          {% for account in accounts %}
+          <div class="row">
+            <div>
+              <div class="email">{{ account.account_email }}</div>
+              <div class="meta">
+                {% if account.last_synced_at %}
+                  last sync {{ account.last_synced_at.strftime("%Y-%m-%d %H:%M") }} UTC
+                {% else %}
+                  not synced yet
+                {% endif %}
+              </div>
+            </div>
+            <div class="status {{ account.status }}">{{ account.status }}</div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <p class="empty">No Gmail accounts connected yet.</p>
+        {% endif %}
+      </div>
+
+      <div class="actions">
+        <a class="button" href="/auth/google/start">Connect another Gmail</a>
+        <form method="post" action="/digest/run">
+          <input type="hidden" name="hours" value="1" />
+          <button class="secondary" type="submit">Test last hour</button>
+        </form>
+        <form method="post" action="/digest/run">
+          <button class="secondary" type="submit">Send full report</button>
+        </form>
+      </div>
+
+      <footer>
+        Before connecting a new address: Google Cloud → APIs &amp; Services →
+        OAuth consent screen → Audience → add it as a <strong>test user</strong>.
+        Then click Connect and choose that Google account (not the one already
+        listed). Redirect URI must be
+        <code>http://localhost:8001/auth/google/callback</code>.
+        Mail bodies are never stored.
+      </footer>
+    </main>
+  </body>
+</html>

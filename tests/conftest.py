@@ -1,9 +1,20 @@
 import os
 from collections.abc import Generator
 
+from cryptography.fernet import Fernet
+
 os.environ["DATABASE_URL"] = os.getenv(
     "TEST_DATABASE_URL",
     "postgresql+psycopg://inboxguard:inboxguard@localhost:5434/inboxguard_test",
+)
+os.environ.setdefault("TOKEN_ENCRYPTION_KEY", Fernet.generate_key().decode())
+os.environ.setdefault("GOOGLE_CLIENT_ID", "test-client-id.apps.googleusercontent.com")
+os.environ.setdefault("GOOGLE_CLIENT_SECRET", "test-google-client-secret")
+os.environ.setdefault("GOOGLE_REDIRECT_URI", "http://localhost:8000/auth/google/callback")
+os.environ["FRONTEND_ORIGIN"] = ""
+os.environ["ENABLE_SCHEDULER"] = "false"
+os.environ["REGISTRY_PATH"] = str(
+    __import__("pathlib").Path(__file__).resolve().parent / "_tmp_replai_registry.xlsx"
 )
 
 import time  # noqa: E402

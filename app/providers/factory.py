@@ -30,6 +30,7 @@ def get_llm_provider(settings: Settings | None = None) -> LLMProvider:
             base_url=s.llm_base_url,
             json_mode=s.llm_json_mode,
             disable_thinking=s.llm_disable_thinking,
+            reasoning_effort=s.llm_reasoning_effort,
             timeout=s.llm_timeout_s,
             max_tokens=s.llm_max_tokens,
         )

@@ -5,7 +5,7 @@ import logging
 import anthropic
 
 from app.providers.base import Classification, EmailInput, TokenUsage
-from app.providers.http_retry import TransientLLMError, call_with_retry, is_transient_status
+from app.providers.http_retry import TransientHttpError, call_with_retry, is_transient_status
 from app.providers.parsing import classify_with_json_retry
 from app.providers.prompt import SYSTEM_PROMPT, user_prompt
 
@@ -52,7 +52,7 @@ class AnthropicProvider:
             except anthropic.APIStatusError as exc:
                 status = getattr(exc, "status_code", 0) or 0
                 if is_transient_status(status):
-                    raise TransientLLMError(status) from exc
+                    raise TransientHttpError(status) from exc
                 logger.error("LLM HTTP %s", status)
                 raise
 

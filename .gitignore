@@ -14,3 +14,4 @@ htmlcov/
 *.log
 emails.json
 *.local.json
+tests/_tmp_replai_registry.xlsx

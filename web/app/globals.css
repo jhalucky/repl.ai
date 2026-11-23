@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #07060d;
+  --bg-elevated: #110f18;
+  --fg: #f6f3ec;
+  --muted: #9b96a8;
+  --line: rgba(255, 255, 255, 0.08);
+  --accent: #8b7cff;
+  --accent-2: #3ee0c2;
+  --danger: #f0a07a;
+  --ok: #7dcea0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  min-height: 100svh;
+  color: var(--fg);
+  background: var(--bg);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+::selection {
+  background: rgba(139, 124, 255, 0.35);
+  color: var(--fg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 3px;
+}
+
+.font-display {
+  font-family: var(--font-display), Georgia, serif;
+}
+
+.site-shell {
+  position: relative;
+  isolation: isolate;
+  overflow-x: clip;
+}
+
+.site-shell::before,
+.site-shell::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  z-index: -1;
+  border-radius: 999px;
+  filter: blur(80px);
+}
+
+.site-shell::before {
+  top: -8rem;
+  right: -6rem;
+  width: 28rem;
+  height: 28rem;
+  background: radial-gradient(circle, rgba(139, 124, 255, 0.28), transparent 68%);
+}
+
+.site-shell::after {
+  bottom: 10%;
+  left: -8rem;
+  width: 26rem;
+  height: 26rem;
+  background: radial-gradient(circle, rgba(62, 224, 194, 0.16), transparent 70%);
+}
+
+.panel {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100%;
+  z-index: 60;
+  background: var(--fg);
+  color: var(--bg);
+  padding: 0.5rem 1rem;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}

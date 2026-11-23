@@ -4,7 +4,7 @@ import httpx
 import pytest
 
 from app.providers.base import EmailInput
-from app.providers.http_retry import TransientLLMError
+from app.providers.http_retry import TransientHttpError
 from app.providers.openai_compatible import OpenAICompatibleProvider
 
 VALID_CONTENT = json.dumps(
@@ -150,7 +150,7 @@ def test_retries_once_on_502_then_gives_up() -> None:
         return httpx.Response(502, json={"error": "upstream"})
 
     email = EmailInput(sender="a@b.com", subject="Hi", body="Hello?")
-    with pytest.raises(TransientLLMError) as exc:
+    with pytest.raises(TransientHttpError) as exc:
         _provider(handler).classify(email)
     assert exc.value.status_code == 502
     assert calls["n"] == 2

@@ -50,11 +50,22 @@ class Account(Base):
     encrypted_refresh_token: Mapped[str] = mapped_column(Text, nullable=False)
     history_cursor: Mapped[str | None] = mapped_column(String(256), nullable=True)
     last_synced_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    status: Mapped[str] = mapped_column(
+        String(32), nullable=False, default="active", server_default="active"
+    )
 
     user: Mapped[User] = relationship(back_populates="accounts")
-    threads: Mapped[list["Thread"]] = relationship(back_populates="account")
+    threads: Mapped[list["Thread"]] = relationship(
+        back_populates="account", cascade="all, delete-orphan"
+    )
 
-    __table_args__ = (UniqueConstraint("user_id", "account_email", name="uq_accounts_user_email"),)
+    __table_args__ = (
+        UniqueConstraint("user_id", "account_email", name="uq_accounts_user_email"),
+        CheckConstraint(
+            "status IN ('active', 'needs_reconnect')",
+            name="ck_accounts_status",
+        ),
+    )
 
 
 class Thread(Base):

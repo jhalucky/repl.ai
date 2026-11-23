@@ -9,10 +9,13 @@ logger = logging.getLogger(__name__)
 TRANSIENT_STATUS = {429, 500, 502, 503, 504}
 
 
-class TransientLLMError(Exception):
+class TransientHttpError(Exception):
     def __init__(self, status_code: int) -> None:
         self.status_code = status_code
-        super().__init__(f"LLM HTTP {status_code}")
+        super().__init__(f"HTTP {status_code}")
+
+
+TransientLLMError = TransientHttpError
 
 
 def is_transient_status(status_code: int) -> bool:
@@ -30,11 +33,11 @@ def call_with_retry[T](
     for attempt in range(retries + 1):
         try:
             return fn()
-        except TransientLLMError as exc:
+        except TransientHttpError as exc:
             last_error = exc
             if attempt >= retries:
                 break
-            logger.warning("LLM HTTP %s, retrying", exc.status_code)
+            logger.warning("HTTP %s, retrying", exc.status_code)
             sleep(backoff_seconds * (attempt + 1))
     assert last_error is not None
     raise last_error

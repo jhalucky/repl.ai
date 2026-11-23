@@ -6,7 +6,7 @@ from typing import Any
 import httpx
 
 from app.providers.base import Classification, EmailInput, TokenUsage
-from app.providers.http_retry import TransientLLMError, call_with_retry, is_transient_status
+from app.providers.http_retry import TransientHttpError, call_with_retry, is_transient_status
 from app.providers.parsing import classify_with_json_retry
 from app.providers.prompt import SYSTEM_PROMPT, user_prompt
 
@@ -22,6 +22,7 @@ class OpenAICompatibleProvider:
         base_url: str,
         json_mode: bool = True,
         disable_thinking: bool = False,
+        reasoning_effort: str | None = None,
         client: httpx.Client | None = None,
         timeout: float = 30.0,
         max_tokens: int = 300,
@@ -32,6 +33,7 @@ class OpenAICompatibleProvider:
         self._base_url = base_url.rstrip("/")
         self._json_mode = json_mode
         self._disable_thinking = disable_thinking
+        self._reasoning_effort = (reasoning_effort or "").strip() or None
         self._timeout = timeout
         self._max_tokens = max_tokens
         self._backoff_seconds = backoff_seconds
@@ -59,6 +61,8 @@ class OpenAICompatibleProvider:
         }
         if self._json_mode:
             payload["response_format"] = {"type": "json_object"}
+        if self._reasoning_effort:
+            payload["reasoning_effort"] = self._reasoning_effort
 
         headers = {
             "Authorization": f"Bearer {self._api_key}",
@@ -71,7 +75,7 @@ class OpenAICompatibleProvider:
                 url, headers=headers, json=payload, timeout=self._timeout
             )
             if is_transient_status(response.status_code):
-                raise TransientLLMError(response.status_code)
+                raise TransientHttpError(response.status_code)
             if response.status_code >= 400:
                 logger.error("LLM HTTP %s", response.status_code)
                 response.raise_for_status()

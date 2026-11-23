@@ -27,6 +27,21 @@ def test_user_email_unique(db_session: Session) -> None:
         db_session.flush()
 
 
+def test_account_default_status_active(db_session: Session) -> None:
+    user = User(email="status-acc@example.com")
+    db_session.add(user)
+    db_session.flush()
+    account = Account(
+        user_id=user.id,
+        account_email="me@example.com",
+        encrypted_refresh_token="encrypted-placeholder",
+    )
+    db_session.add(account)
+    db_session.flush()
+    db_session.refresh(account)
+    assert account.status == "active"
+
+
 def test_thread_unique_per_account(db_session: Session) -> None:
     user = User(email="owner@example.com")
     db_session.add(user)
